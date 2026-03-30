@@ -41,7 +41,7 @@ const allItems: SearchResultItem[] = [
     id: d.id,
     title: d.genericName,
     description: `${d.drugClass}. Used for: ${d.commonUses.join(", ")}. Brands: ${d.brandNames.join(", ")}.`,
-    href: `/drugs/${d.id}`,
+    href: "#",
     category: d.drugClass,
   })),
 ];
