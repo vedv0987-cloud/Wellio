@@ -15,7 +15,7 @@ import {
   TestTubes,
 } from "lucide-react";
 
-type TestCategory = "All" | "Blood" | "Urine" | "Imaging" | "Heart" | "Diabetes" | "Thyroid";
+type TestCategory = "All" | "Blood" | "Urine" | "Imaging" | "Heart" | "Diabetes" | "Thyroid" | "Liver" | "Kidney";
 
 interface NormalRange {
   component: string;
@@ -36,7 +36,7 @@ interface LabTest {
   abnormalMeaning: string;
 }
 
-const CATEGORIES: TestCategory[] = ["All", "Blood", "Urine", "Imaging", "Heart", "Diabetes", "Thyroid"];
+const CATEGORIES: TestCategory[] = ["All", "Blood", "Urine", "Imaging", "Heart", "Diabetes", "Thyroid", "Liver", "Kidney"];
 
 const labTests: LabTest[] = [
   {
@@ -126,7 +126,7 @@ const labTests: LabTest[] = [
   {
     id: "lft",
     name: "Liver Function Test (LFT)",
-    category: ["Blood"],
+    category: ["Blood", "Liver"],
     icon: <FlaskConical className="w-5 h-5" />,
     whatItChecks: "Measures enzymes, proteins, and substances produced or processed by the liver to assess liver health and function.",
     whyOrdered: "To detect liver damage, monitor chronic liver conditions, check medication side effects, and evaluate symptoms like jaundice or abdominal pain.",
@@ -144,7 +144,7 @@ const labTests: LabTest[] = [
   {
     id: "kft",
     name: "Kidney Function Test (KFT)",
-    category: ["Blood"],
+    category: ["Blood", "Kidney"],
     icon: <FlaskConical className="w-5 h-5" />,
     whatItChecks: "Measures creatinine, BUN (blood urea nitrogen), and eGFR to evaluate how well your kidneys are filtering waste from the blood.",
     whyOrdered: "To detect kidney disease, monitor kidney function in diabetes/hypertension patients, and check medication effects on kidneys.",
@@ -344,7 +344,7 @@ export default function LabTestsPage() {
             Lab Test Explainer
           </h1>
           <p className="text-lg" style={{ color: "var(--hw-text-secondary)" }}>
-            Understand your medical tests and what the results mean
+            Understanding your medical tests
           </p>
         </motion.div>
 
@@ -471,6 +471,14 @@ export default function LabTestsPage() {
                           </span>
                         ))}
                       </div>
+                      {!isExpanded && (
+                        <p
+                          className="text-sm mt-2 line-clamp-1 leading-relaxed"
+                          style={{ color: "var(--hw-text-muted)" }}
+                        >
+                          {test.whatItChecks}
+                        </p>
+                      )}
                     </div>
                     <ChevronDown
                       className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
