@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Condition {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  name                String
+  nameHindi           String?
+  pronunciation       String?
+  category            String
+  severity            String
+  overview            String
+  overviewHindi       String?
+  symptoms            String   // JSON
+  causes              String   // JSON
+  riskFactors         String   // JSON
+  diagnosisSteps      String   // JSON
+  treatments          String   // JSON
+  preventionChecklist String   // JSON
+  doctorQuestions     String   // JSON
+  ayurvedaRemedies    String?  // JSON
+  visualSlides        String   // JSON
+  affectedPercentage  Float
+  commonAgeGroup      String
+  isCurable           Boolean
+  relatedConditionIds String   // JSON array
+  sourceVideos        String   // JSON
+  lastReviewedDate    String
+  lastReviewedBy      String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Video {
+  id              String   @id @default(uuid())
+  youtubeId       String   @unique
+  title           String
+  creatorId       String
+  conditionIds    String   // JSON array
+  durationSeconds Int
+  viewCount       Int
+  thumbnailUrl    String
+  publishedAt     String
+  language        String
+  tags            String   // JSON array
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Creator {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  name             String
+  youtubeChannelId String
+  avatarUrl        String
+  specialty        String
+  credentials      String   // JSON array
+  subscriberCount  Int
+  language         String
+  bio              String
+  videoCount       Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Drug {
+  id           String   @id @default(uuid())
+  genericName  String
+  brandNames   String   // JSON array
+  drugClass    String
+  commonUses   String   // JSON array
+  sideEffects  String   // JSON array
+  warnings     String   // JSON array
+  interactions String   // JSON array
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LabTest {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  name                String
+  category            String
+  whatItChecks        String
+  whyOrdered          String
+  preparation         String
+  whatToExpect         String
+  normalRanges        String   // JSON array
+  abnormalMeaning     String
+  relatedConditionIds String   // JSON array
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Procedure {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  name                String
+  bodyArea            String
+  duration            String
+  recoveryTime        String
+  steps               String   // JSON array
+  risks               String   // JSON array
+  costRangeInr        String
+  doctorQuestions     String   // JSON array
+  relatedConditionIds String   // JSON array
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model FirstAidProcedure {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  name             String
+  isTimeCritical   Boolean
+  steps            String   // JSON array
+  emergencyNumbers String   // JSON
+  relatedVideoIds  String   // JSON array
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model GlossaryTerm {
+  id                    String   @id @default(uuid())
+  term                  String
+  pronunciation         String?
+  definition            String
+  definitionHindi       String?
+  detailedExplanation   String?
+  usedInConditionIds    String   // JSON array
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model LearningPath {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  title           String
+  description     String
+  durationDays    Int
+  difficulty      String
+  lessons         String   // JSON array
+  enrollmentCount Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model UserProfile {
+  id                    String   @id @default(uuid())
+  email                 String   @unique
+  name                  String
+  languagePreference    String   @default("en")
+  themePreference       String   @default("system")
+  bookmarkedConditions  String   @default("[]") // JSON array
+  savedVideos           String   @default("[]") // JSON array
+  enrolledPaths         String   @default("[]") // JSON array
+  drugList              String   @default("[]") // JSON array
+  preventionChecklists  String   @default("{}") // JSON
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model ChatHistory {
+  id        String   @id @default(uuid())
+  userId    String?
+  messages  String   // JSON array
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

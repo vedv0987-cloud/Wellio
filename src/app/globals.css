@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FAFBFC;
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F1F5F9;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-accent: #0D9488;
+  --color-accent-hover: #0F766E;
+  --color-accent-secondary: #F59E0B;
+  --color-accent-danger: #EF4444;
+  --color-accent-success: #22C55E;
+  --color-accent-info: #3B82F6;
+  --color-border: #E2E8F0;
+  --color-border-hover: #CBD5E1;
+
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Source Serif 4", serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.12);
+}
+
+:root {
+  --hw-bg: #FAFBFC;
+  --hw-surface: #FFFFFF;
+  --hw-surface-secondary: #F1F5F9;
+  --hw-text-primary: #0F172A;
+  --hw-text-secondary: #475569;
+  --hw-text-muted: #94A3B8;
+  --hw-accent: #0D9488;
+  --hw-accent-hover: #0F766E;
+  --hw-accent-secondary: #F59E0B;
+  --hw-danger: #EF4444;
+  --hw-success: #22C55E;
+  --hw-info: #3B82F6;
+  --hw-border: #E2E8F0;
+  --hw-border-hover: #CBD5E1;
+}
+
+.dark {
+  --hw-bg: #0B1120;
+  --hw-surface: #111827;
+  --hw-surface-secondary: #1E293B;
+  --hw-text-primary: #F1F5F9;
+  --hw-text-secondary: #94A3B8;
+  --hw-text-muted: #64748B;
+  --hw-accent: #14B8A6;
+  --hw-accent-hover: #2DD4BF;
+  --hw-accent-secondary: #FBBF24;
+  --hw-danger: #F87171;
+  --hw-success: #4ADE80;
+  --hw-info: #60A5FA;
+  --hw-border: #1E293B;
+  --hw-border-hover: #334155;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--hw-bg);
+  color: var(--hw-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--hw-surface-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hw-text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hw-text-secondary);
+}
+
+/* Skip to content */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  padding: 8px 16px;
+  background: var(--hw-accent);
+  color: white;
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
