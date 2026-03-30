@@ -1,121 +1,129 @@
-'use client';
+"use client";
 
-import { motion } from 'motion/react';
-import { Clock, BookOpen, ArrowRight } from 'lucide-react';
+import { useState } from "react";
+import { motion } from "motion/react";
+import { Clock, BookOpen, ArrowRight, Sparkles } from "lucide-react";
 
 interface LearningPath {
+  id: string;
   title: string;
   description: string;
-  duration: string;
-  lessons: number;
-  difficulty: 'Beginner' | 'Intermediate';
+  durationDays: number;
+  lessonCount: number;
+  difficulty: "Beginner" | "Intermediate";
+  color: string;
   progress: number;
 }
 
 const learningPaths: LearningPath[] = [
   {
-    title: '30-Day Diabetes Management',
-    description:
-      'Learn to manage blood sugar levels through diet, exercise, and monitoring. Build lasting habits for a healthier life with diabetes.',
-    duration: '30 days',
-    lessons: 30,
-    difficulty: 'Beginner',
+    id: "diabetes-management",
+    title: "30-Day Diabetes Management",
+    description: "Master blood sugar control through diet, exercise, medication management, and lifestyle changes. Learn to read lab results, plan meals, and build sustainable habits for long-term diabetes management.",
+    durationDays: 30,
+    lessonCount: 24,
+    difficulty: "Beginner",
+    color: "#3b82f6",
     progress: 0,
   },
   {
-    title: '14-Day Heart Health',
-    description:
-      'Build heart-healthy habits with daily exercises and nutrition tips. Strengthen your cardiovascular system with evidence-based routines.',
-    duration: '14 days',
-    lessons: 14,
-    difficulty: 'Beginner',
+    id: "heart-health",
+    title: "14-Day Heart Health",
+    description: "Understand cardiovascular health from cholesterol and blood pressure to heart-healthy diets and exercise. Learn warning signs of heart attacks and strokes, and actionable steps to reduce your risk.",
+    durationDays: 14,
+    lessonCount: 12,
+    difficulty: "Beginner",
+    color: "#ef4444",
     progress: 0,
   },
   {
-    title: '21-Day Stress Relief',
-    description:
-      'Master stress management through mindfulness, breathing, and lifestyle changes. Develop a personalized toolkit for daily calm and resilience.',
-    duration: '21 days',
-    lessons: 21,
-    difficulty: 'Beginner',
+    id: "stress-relief",
+    title: "21-Day Stress Relief",
+    description: "Build a comprehensive stress management toolkit with breathing techniques, meditation, progressive muscle relaxation, journaling, and cognitive reframing. Backed by neuroscience research.",
+    durationDays: 21,
+    lessonCount: 18,
+    difficulty: "Beginner",
+    color: "#8b5cf6",
     progress: 0,
   },
   {
-    title: '30-Day Weight Management',
-    description:
-      'Sustainable weight management through balanced nutrition and activity. Learn the science behind metabolism and create your ideal routine.',
-    duration: '30 days',
-    lessons: 30,
-    difficulty: 'Intermediate',
+    id: "weight-management",
+    title: "30-Day Weight Management",
+    description: "Evidence-based approach to sustainable weight management. Covers nutrition science, calorie awareness, exercise programming, sleep optimization, and building a healthy relationship with food.",
+    durationDays: 30,
+    lessonCount: 26,
+    difficulty: "Intermediate",
+    color: "#10b981",
     progress: 0,
   },
   {
-    title: '14-Day Better Sleep',
-    description:
-      'Transform your sleep quality with evidence-based sleep hygiene practices. Wake up refreshed and energized every morning.',
-    duration: '14 days',
-    lessons: 14,
-    difficulty: 'Beginner',
+    id: "better-sleep",
+    title: "14-Day Better Sleep",
+    description: "Transform your sleep quality through sleep hygiene practices, circadian rhythm optimization, bedroom environment setup, and techniques to fall asleep faster and stay asleep longer.",
+    durationDays: 14,
+    lessonCount: 10,
+    difficulty: "Beginner",
+    color: "#6366f1",
     progress: 0,
   },
   {
-    title: '21-Day Gut Health',
-    description:
-      'Restore gut health through probiotics, fiber, and anti-inflammatory foods. Understand the microbiome and its impact on overall wellness.',
-    duration: '21 days',
-    lessons: 21,
-    difficulty: 'Intermediate',
+    id: "gut-health",
+    title: "21-Day Gut Health",
+    description: "Explore the gut microbiome and its impact on overall health. Learn about prebiotics, probiotics, fermented foods, elimination diets, and how gut health affects immunity, mood, and energy levels.",
+    durationDays: 21,
+    lessonCount: 16,
+    difficulty: "Intermediate",
+    color: "#f59e0b",
     progress: 0,
   },
 ];
 
 function ProgressRing({
   progress,
-  size = 80,
+  size = 64,
+  strokeWidth = 5,
+  color,
 }: {
   progress: number;
   size?: number;
+  strokeWidth?: number;
+  color: string;
 }) {
-  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
-  const center = size / 2;
 
   return (
     <svg width={size} height={size} className="shrink-0">
-      {/* Track */}
       <circle
-        cx={center}
-        cy={center}
+        cx={size / 2}
+        cy={size / 2}
         r={radius}
         fill="none"
         stroke="var(--hw-border)"
         strokeWidth={strokeWidth}
       />
-      {/* Fill */}
       <circle
-        cx={center}
-        cy={center}
+        cx={size / 2}
+        cy={size / 2}
         r={radius}
         fill="none"
-        stroke="var(--hw-accent)"
+        stroke={color}
         strokeWidth={strokeWidth}
-        strokeLinecap="round"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
-        transform={`rotate(-90 ${center} ${center})`}
-        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        className="transition-all duration-700"
       />
-      {/* Text */}
       <text
-        x={center}
-        y={center}
+        x={size / 2}
+        y={size / 2}
         textAnchor="middle"
         dominantBaseline="central"
+        fill="var(--hw-text-primary)"
         fontSize="14"
         fontWeight="700"
-        fill="var(--hw-text-primary)"
       >
         {progress}%
       </text>
@@ -123,120 +131,125 @@ function ProgressRing({
   );
 }
 
-function DifficultyBadge({ difficulty }: { difficulty: 'Beginner' | 'Intermediate' }) {
-  const isGreen = difficulty === 'Beginner';
-  return (
-    <span
-      className="inline-block rounded-full px-3 py-0.5 text-xs font-semibold"
-      style={{
-        backgroundColor: isGreen
-          ? 'rgba(34, 197, 94, 0.15)'
-          : 'rgba(245, 158, 11, 0.15)',
-        color: isGreen ? '#16a34a' : '#d97706',
-      }}
-    >
-      {difficulty}
-    </span>
-  );
-}
-
 export default function LearningPathsPage() {
+  const [paths] = useState(learningPaths);
+
   return (
     <div
-      className="min-h-screen px-4 py-12 sm:px-6 lg:px-8"
-      style={{ backgroundColor: 'var(--hw-surface)', color: 'var(--hw-text-primary)' }}
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--hw-bg)", color: "var(--hw-text-primary)" }}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-10 text-center"
+          className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-4xl sm:text-5xl font-bold font-display mb-3">
             Learning Paths
           </h1>
-          <p
-            className="mt-3 text-lg"
-            style={{ color: 'var(--hw-text-secondary)' }}
-          >
+          <p className="text-lg" style={{ color: "var(--hw-text-secondary)" }}>
             Guided Health Journeys
           </p>
         </motion.div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {learningPaths.map((path, index) => (
+        {/* Path Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paths.map((path, idx) => (
             <motion.div
-              key={path.title}
-              initial={{ opacity: 0, y: 30 }}
+              key={path.id}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 0.4,
-                delay: index * 0.1,
-                type: 'spring',
-                stiffness: 120,
-                damping: 18,
+                duration: 0.45,
+                delay: idx * 0.1,
+                ease: [0.25, 0.46, 0.45, 0.94],
               }}
-              whileHover={{ y: -6, scale: 1.02 }}
-              className="cursor-pointer overflow-hidden rounded-2xl shadow-sm transition-shadow hover:shadow-md"
+              className="rounded-xl border p-6 flex flex-col transition-all duration-200 hover:shadow-lg group"
               style={{
-                backgroundColor: 'var(--hw-surface-secondary)',
-                borderTop: '1px solid var(--hw-border)',
-                borderRight: '1px solid var(--hw-border)',
-                borderBottom: '1px solid var(--hw-border)',
-                borderLeft: '4px solid var(--hw-accent)',
+                backgroundColor: "var(--hw-surface)",
+                borderColor: "var(--hw-border)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = path.color;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--hw-border)";
               }}
             >
-              <div className="p-6">
-                {/* Top: title + difficulty */}
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold leading-snug">
+              {/* Top: Title & Progress Ring */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-bold mb-2 leading-tight">
                     {path.title}
                   </h3>
-                  <DifficultyBadge difficulty={path.difficulty} />
-                </div>
-
-                {/* Description */}
-                <p
-                  className="mt-3 text-sm leading-relaxed"
-                  style={{ color: 'var(--hw-text-secondary)' }}
-                >
-                  {path.description}
-                </p>
-
-                {/* Meta badges */}
-                <div className="mt-4 flex items-center gap-4">
-                  <div
-                    className="flex items-center gap-1.5 text-sm"
-                    style={{ color: 'var(--hw-text-muted)' }}
-                  >
-                    <Clock className="h-4 w-4" />
-                    <span>{path.duration}</span>
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: `${path.color}15`,
+                        color: path.color,
+                      }}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      {path.durationDays} Days
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: "var(--hw-surface-secondary)",
+                        color: "var(--hw-text-secondary)",
+                      }}
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      {path.lessonCount} Lessons
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor:
+                          path.difficulty === "Beginner"
+                            ? "rgba(16, 185, 129, 0.12)"
+                            : "rgba(245, 158, 11, 0.12)",
+                        color:
+                          path.difficulty === "Beginner" ? "#10b981" : "#f59e0b",
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {path.difficulty}
+                    </span>
                   </div>
-                  <div
-                    className="flex items-center gap-1.5 text-sm"
-                    style={{ color: 'var(--hw-text-muted)' }}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    <span>{path.lessons} lessons</span>
-                  </div>
                 </div>
-
-                {/* Progress ring + button */}
-                <div className="mt-5 flex items-center justify-between">
-                  <ProgressRing progress={path.progress} />
-
-                  <button
-                    className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ backgroundColor: 'var(--hw-accent)' }}
-                  >
-                    Start Now
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
+                <ProgressRing progress={path.progress} color={path.color} />
               </div>
+
+              {/* Description */}
+              <p
+                className="text-sm leading-relaxed flex-1 mb-5"
+                style={{ color: "var(--hw-text-secondary)" }}
+              >
+                {path.description}
+              </p>
+
+              {/* Start Button */}
+              <button
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-semibold text-white transition-all duration-200 group-hover:shadow-md"
+                style={{
+                  backgroundColor: path.color,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+              >
+                Start Now
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
             </motion.div>
           ))}
         </div>

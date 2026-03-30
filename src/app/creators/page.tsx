@@ -1,364 +1,306 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { ChevronDown, Users, Globe } from 'lucide-react';
-
-const SPECIALTIES = [
-  'All',
-  'Nutrition',
-  'Fitness',
-  'Neuroscience',
-  'Yoga & Wellness',
-  'Functional Medicine',
-  'General Health',
-] as const;
-
-type Specialty = (typeof SPECIALTIES)[number];
+import { useState, useMemo } from "react";
+import { motion } from "motion/react";
+import { ChevronDown, Users, Globe, BadgeCheck } from "lucide-react";
 
 interface Creator {
+  id: string;
   name: string;
-  displayName?: string;
+  initials: string;
   specialty: string;
-  credentials: string[];
-  subscribers: string;
-  language: 'EN' | 'HI' | 'Both';
+  credentials: string;
+  subscriberCount: string;
+  language: string;
   bio: string;
-  category: Specialty;
+  color: string;
 }
 
 const creators: Creator[] = [
   {
-    name: 'Dr. Eric Berg',
-    specialty: 'Keto & Nutrition',
-    credentials: ['DC'],
-    subscribers: '11.5M',
-    language: 'EN',
-    bio: 'Leading expert in ketogenic diets and intermittent fasting with decades of clinical experience in nutritional science.',
-    category: 'Nutrition',
+    id: "eric-berg",
+    name: "Dr. Eric Berg",
+    initials: "EB",
+    specialty: "Nutrition & Keto",
+    credentials: "Doctor of Chiropractic",
+    subscriberCount: "12.8M",
+    language: "English",
+    bio: "Specializes in healthy ketosis and intermittent fasting. Known for detailed explanations of how vitamins, minerals, and nutrition affect health conditions. Covers topics from weight loss to hormonal health with easy-to-understand visual aids.",
+    color: "#3b82f6",
   },
   {
-    name: 'Fit Tuber',
-    displayName: 'Vivek Mittal',
-    specialty: 'Indian Fitness & Health',
-    credentials: ['Certified Nutritionist'],
-    subscribers: '8.2M',
-    language: 'Both',
-    bio: 'Bridging traditional Indian wellness with modern fitness science, offering practical health advice for everyday life.',
-    category: 'Fitness',
+    id: "fit-tuber",
+    name: "Fit Tuber",
+    initials: "FT",
+    specialty: "Fitness & Ayurveda",
+    credentials: "Certified Fitness Trainer",
+    subscriberCount: "8.5M",
+    language: "Hindi / English",
+    bio: "India's popular health and fitness creator covering Ayurvedic remedies, exercise routines, diet plans, and product reviews. Known for practical health tips rooted in Indian lifestyle and traditional medicine combined with modern science.",
+    color: "#10b981",
   },
   {
-    name: 'Andrew Huberman',
-    specialty: 'Neuroscience & Health',
-    credentials: ['PhD', 'Stanford'],
-    subscribers: '5.8M',
-    language: 'EN',
-    bio: 'Stanford neuroscience professor exploring science-based tools for everyday life, sleep, focus, and performance.',
-    category: 'Neuroscience',
+    id: "andrew-huberman",
+    name: "Andrew Huberman",
+    initials: "AH",
+    specialty: "Neuroscience",
+    credentials: "PhD, Stanford Professor",
+    subscriberCount: "6.2M",
+    language: "English",
+    bio: "Stanford neuroscience professor sharing science-based tools for everyday life. Covers sleep optimization, focus, stress management, exercise science, and mental health through the Huberman Lab podcast. Known for deep-dive, evidence-based episodes.",
+    color: "#8b5cf6",
   },
   {
-    name: 'Satvic Movement',
-    specialty: 'Ayurveda & Natural Healing',
-    credentials: ['Certified Yoga'],
-    subscribers: '4.2M',
-    language: 'Both',
-    bio: 'Promoting natural healing through Ayurvedic practices, satvic diet, yoga, and holistic lifestyle transformation.',
-    category: 'Yoga & Wellness',
+    id: "satvic-movement",
+    name: "Satvic Movement",
+    initials: "SM",
+    specialty: "Natural Healing",
+    credentials: "Naturopathy Practitioners",
+    subscriberCount: "5.1M",
+    language: "Hindi / English",
+    bio: "Promotes natural healing through Satvic lifestyle including plant-based diet, sunbathing, enema, wet pack therapy, and fasting. Popular for their 21-day health challenge and practical home remedies based on naturopathy principles.",
+    color: "#f59e0b",
   },
   {
-    name: 'Dr. Sten Ekberg',
-    specialty: 'Holistic Health',
-    credentials: ['DC', 'DIBAK'],
-    subscribers: '3.8M',
-    language: 'EN',
-    bio: 'Olympic decathlete turned holistic health practitioner, explaining complex health topics with clarity and depth.',
-    category: 'General Health',
+    id: "sten-ekberg",
+    name: "Dr. Sten Ekberg",
+    initials: "SE",
+    specialty: "Holistic Health",
+    credentials: "Doctor of Chiropractic, Olympian",
+    subscriberCount: "4.8M",
+    language: "English",
+    bio: "Former Olympic decathlete and chiropractor who explains complex health topics in simple terms. Focuses on insulin resistance, diabetes reversal, intermittent fasting, and how the body truly works. Known for calm, thorough presentations.",
+    color: "#06b6d4",
   },
   {
-    name: 'Dr. Mark Hyman',
-    specialty: 'Functional Medicine',
-    credentials: ['MD'],
-    subscribers: '4.5M',
-    language: 'EN',
-    bio: 'Pioneer of functional medicine advocating for food as medicine and root-cause approaches to chronic disease.',
-    category: 'Functional Medicine',
+    id: "mark-hyman",
+    name: "Dr. Mark Hyman",
+    initials: "MH",
+    specialty: "Functional Medicine",
+    credentials: "MD, Board Certified",
+    subscriberCount: "4.2M",
+    language: "English",
+    bio: "Pioneer of functional medicine and bestselling author. Advocates for food as medicine approach to chronic disease. Covers gut health, inflammation, diabetes reversal, and longevity. Known for The Doctor's Farmacy podcast featuring expert interviews.",
+    color: "#ec4899",
   },
   {
-    name: 'Ankur Warikoo',
-    specialty: 'Health & Productivity',
-    credentials: ['MBA'],
-    subscribers: '3.2M',
-    language: 'Both',
-    bio: 'Entrepreneur and educator sharing actionable insights on health optimization, productivity, and mindful living.',
-    category: 'General Health',
+    id: "ankur-warikoo",
+    name: "Ankur Warikoo",
+    initials: "AW",
+    specialty: "Mental Wellness",
+    credentials: "Entrepreneur & Author",
+    subscriberCount: "3.9M",
+    language: "Hindi / English",
+    bio: "While primarily a business creator, covers mental health, work-life balance, stress management, and self-improvement extensively. Known for relatable content on burnout, anxiety, and building healthy habits for young professionals in India.",
+    color: "#f97316",
   },
   {
-    name: 'Dr. Mandell',
-    displayName: 'Motivationaldoc',
-    specialty: 'Chiropractic & Pain',
-    credentials: ['DC'],
-    subscribers: '6.1M',
-    language: 'EN',
-    bio: 'Chiropractic physician specializing in pain relief techniques, posture correction, and musculoskeletal health.',
-    category: 'General Health',
+    id: "dr-mandell",
+    name: "Dr. Mandell",
+    initials: "DM",
+    specialty: "Pain Relief & Posture",
+    credentials: "Doctor of Chiropractic",
+    subscriberCount: "3.6M",
+    language: "English",
+    bio: "Known as 'motivationaldoc', specializes in pain relief techniques, posture correction, and natural remedies for common ailments. Videos are short, practical, and immediately actionable for back pain, neck pain, headaches, and joint issues.",
+    color: "#14b8a6",
   },
   {
-    name: 'Yoga With Adriene',
-    specialty: 'Yoga & Wellness',
-    credentials: ['RYT-200'],
-    subscribers: '12.8M',
-    language: 'EN',
-    bio: 'Making yoga accessible to everyone with free practices that nurture body, mind, and spirit for all skill levels.',
-    category: 'Yoga & Wellness',
+    id: "yoga-adriene",
+    name: "Yoga With Adriene",
+    initials: "YA",
+    specialty: "Yoga & Mindfulness",
+    credentials: "Certified Yoga Instructor",
+    subscriberCount: "12.5M",
+    language: "English",
+    bio: "The most subscribed yoga channel on YouTube. Offers free yoga practices for all levels, from beginners to advanced. Known for 30-day yoga journeys, stress relief sessions, and making yoga accessible and fun for everyone.",
+    color: "#a855f7",
   },
   {
-    name: 'Dr. Mike',
-    specialty: 'General Medicine',
-    credentials: ['DO'],
-    subscribers: '11.2M',
-    language: 'EN',
-    bio: 'Board-certified family medicine physician making medical education entertaining, relatable, and easy to understand.',
-    category: 'General Health',
+    id: "dr-mike",
+    name: "Dr. Mike",
+    initials: "DM",
+    specialty: "General Medicine",
+    credentials: "DO, Board Certified",
+    subscriberCount: "11.2M",
+    language: "English",
+    bio: "Board-certified family medicine physician who makes medicine entertaining and accessible. Known for reacting to medical TV shows, debunking health myths, and explaining medical conditions in engaging, easy-to-understand formats.",
+    color: "#ef4444",
   },
 ];
 
-const AVATAR_COLORS = [
-  '#2563eb',
-  '#7c3aed',
-  '#db2777',
-  '#ea580c',
-  '#0891b2',
-  '#059669',
-  '#d97706',
-  '#dc2626',
-  '#4f46e5',
-  '#0d9488',
+const specialties = [
+  "All",
+  ...Array.from(new Set(creators.map((c) => c.specialty))),
 ];
-
-function getInitials(name: string): string {
-  const words = name.replace(/^(Dr\.\s*|Yoga With\s*)/i, '').split(/\s+/);
-  if (words.length >= 2) {
-    return (words[0][0] + words[1][0]).toUpperCase();
-  }
-  return words[0].substring(0, 2).toUpperCase();
-}
-
-function getAvatarColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-function LanguageBadge({ language }: { language: 'EN' | 'HI' | 'Both' }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-      style={{
-        backgroundColor: 'var(--hw-surface-secondary)',
-        color: 'var(--hw-text-secondary)',
-        border: '1px solid var(--hw-border)',
-      }}
-    >
-      <Globe className="h-3 w-3" />
-      {language}
-    </span>
-  );
-}
 
 export default function CreatorsPage() {
-  const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty>('All');
+  const [selectedSpecialty, setSelectedSpecialty] = useState("All");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const filtered =
-    selectedSpecialty === 'All'
-      ? creators
-      : creators.filter((c) => c.category === selectedSpecialty);
+  const filtered = useMemo(() => {
+    if (selectedSpecialty === "All") return creators;
+    return creators.filter((c) => c.specialty === selectedSpecialty);
+  }, [selectedSpecialty]);
 
   return (
     <div
-      className="min-h-screen px-4 py-12 sm:px-6 lg:px-8"
-      style={{ backgroundColor: 'var(--hw-surface)', color: 'var(--hw-text-primary)' }}
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--hw-bg)", color: "var(--hw-text-primary)" }}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-10 text-center"
+          className="text-center mb-10"
         >
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-4xl sm:text-5xl font-bold font-display mb-3">
             Health Creator Directory
           </h1>
-          <p
-            className="mt-3 text-lg"
-            style={{ color: 'var(--hw-text-secondary)' }}
-          >
-            Expert health content creators
+          <p className="text-lg" style={{ color: "var(--hw-text-secondary)" }}>
+            Trusted health educators and content creators
           </p>
         </motion.div>
 
-        {/* Filter */}
+        {/* Specialty Filter */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mb-8 flex justify-center"
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="max-w-xs mx-auto mb-10 relative"
         >
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-colors"
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full flex items-center justify-between rounded-xl px-4 py-3 border transition-all duration-200"
+            style={{
+              backgroundColor: "var(--hw-surface)",
+              borderColor: dropdownOpen ? "var(--hw-accent)" : "var(--hw-border)",
+            }}
+          >
+            <span className="text-sm font-medium">
+              {selectedSpecialty === "All" ? "Filter by Specialty" : selectedSpecialty}
+            </span>
+            <ChevronDown
+              className={`w-4 h-4 transition-transform duration-200 ${
+                dropdownOpen ? "rotate-180" : ""
+              }`}
+              style={{ color: "var(--hw-text-secondary)" }}
+            />
+          </button>
+          {dropdownOpen && (
+            <div
+              className="absolute top-full left-0 right-0 mt-2 rounded-xl border shadow-xl z-30 overflow-hidden"
               style={{
-                backgroundColor: 'var(--hw-surface-secondary)',
-                color: 'var(--hw-text-primary)',
-                border: '1px solid var(--hw-border)',
+                backgroundColor: "var(--hw-surface)",
+                borderColor: "var(--hw-border)",
               }}
             >
-              <span style={{ color: 'var(--hw-text-muted)' }}>Specialty:</span>
-              {selectedSpecialty}
-              <ChevronDown
-                className="h-4 w-4 transition-transform"
-                style={{
-                  color: 'var(--hw-text-muted)',
-                  transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}
-              />
-            </button>
-            {dropdownOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute left-0 z-20 mt-2 w-56 rounded-xl py-1 shadow-lg"
-                style={{
-                  backgroundColor: 'var(--hw-surface-secondary)',
-                  border: '1px solid var(--hw-border)',
-                }}
-              >
-                {SPECIALTIES.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      setSelectedSpecialty(s);
-                      setDropdownOpen(false);
-                    }}
-                    className="block w-full px-4 py-2 text-left text-sm transition-colors hover:brightness-90"
-                    style={{
-                      color:
-                        selectedSpecialty === s
-                          ? 'var(--hw-accent)'
-                          : 'var(--hw-text-primary)',
-                      backgroundColor:
-                        selectedSpecialty === s
-                          ? 'var(--hw-surface)'
-                          : 'transparent',
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </div>
+              {specialties.map((specialty) => (
+                <button
+                  key={specialty}
+                  onClick={() => {
+                    setSelectedSpecialty(specialty);
+                    setDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 hover:opacity-80"
+                  style={{
+                    backgroundColor:
+                      selectedSpecialty === specialty
+                        ? "var(--hw-surface-secondary)"
+                        : "transparent",
+                    color:
+                      selectedSpecialty === specialty
+                        ? "var(--hw-accent)"
+                        : "var(--hw-text-primary)",
+                  }}
+                >
+                  {specialty}
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((creator, index) => (
+        {/* Creator Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((creator, idx) => (
             <motion.div
-              key={creator.name}
-              initial={{ opacity: 0, y: 30 }}
+              key={creator.id}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.4,
-                delay: index * 0.08,
-                type: 'spring',
-                stiffness: 120,
-                damping: 18,
-              }}
-              whileHover={{ y: -6, scale: 1.02 }}
-              className="cursor-pointer rounded-2xl p-6 shadow-sm transition-shadow hover:shadow-md"
+              transition={{ duration: 0.35, delay: idx * 0.06 }}
+              className="rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
               style={{
-                backgroundColor: 'var(--hw-surface-secondary)',
-                border: '1px solid var(--hw-border)',
+                backgroundColor: "var(--hw-surface)",
+                borderColor: "var(--hw-border)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = creator.color;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--hw-border)";
               }}
             >
-              <div className="flex items-start gap-4">
-                {/* Avatar */}
+              {/* Avatar & Name */}
+              <div className="flex items-center gap-4 mb-4">
                 <div
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-                  style={{ backgroundColor: getAvatarColor(creator.name) }}
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0"
+                  style={{ backgroundColor: creator.color }}
                 >
-                  {getInitials(creator.name)}
+                  {creator.initials}
                 </div>
-
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-semibold leading-tight">
-                    {creator.name}
-                  </h3>
-                  {creator.displayName && (
-                    <p
-                      className="mt-0.5 text-xs"
-                      style={{ color: 'var(--hw-text-muted)' }}
-                    >
-                      {creator.displayName}
-                    </p>
-                  )}
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold truncate">{creator.name}</h3>
                   <p
-                    className="mt-1 text-sm"
-                    style={{ color: 'var(--hw-accent)' }}
+                    className="text-sm truncate"
+                    style={{ color: "var(--hw-text-secondary)" }}
                   >
                     {creator.specialty}
                   </p>
                 </div>
               </div>
 
-              {/* Credentials */}
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {creator.credentials.map((cred) => (
-                  <span
-                    key={cred}
-                    className="rounded-md px-2 py-0.5 text-xs font-semibold"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--hw-accent) 15%, transparent)',
-                      color: 'var(--hw-accent)',
-                    }}
-                  >
-                    {cred}
-                  </span>
-                ))}
+              {/* Badges Row */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: `${creator.color}20`,
+                    color: creator.color,
+                  }}
+                >
+                  <BadgeCheck className="w-3.5 h-3.5" />
+                  {creator.credentials}
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: "var(--hw-surface-secondary)",
+                    color: "var(--hw-text-secondary)",
+                  }}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  {creator.language}
+                </span>
               </div>
 
-              {/* Stats row */}
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <Users
-                    className="h-4 w-4"
-                    style={{ color: 'var(--hw-text-muted)' }}
-                  />
-                  <span
-                    className="text-sm font-semibold"
-                    style={{ color: 'var(--hw-text-primary)' }}
-                  >
-                    {creator.subscribers}
-                  </span>
-                  <span
-                    className="text-xs"
-                    style={{ color: 'var(--hw-text-muted)' }}
-                  >
-                    subscribers
-                  </span>
-                </div>
-                <LanguageBadge language={creator.language} />
+              {/* Subscriber Count */}
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="w-4 h-4" style={{ color: "var(--hw-text-secondary)" }} />
+                <span className="text-sm font-semibold" style={{ color: creator.color }}>
+                  {creator.subscriberCount}
+                </span>
+                <span className="text-xs" style={{ color: "var(--hw-text-secondary)" }}>
+                  subscribers
+                </span>
               </div>
 
               {/* Bio */}
               <p
-                className="mt-3 text-sm leading-relaxed"
-                style={{ color: 'var(--hw-text-secondary)' }}
+                className="text-sm leading-relaxed line-clamp-3"
+                style={{ color: "var(--hw-text-secondary)" }}
               >
                 {creator.bio}
               </p>
@@ -367,22 +309,13 @@ export default function CreatorsPage() {
         </div>
 
         {filtered.length === 0 && (
-          <p
-            className="mt-16 text-center text-lg"
-            style={{ color: 'var(--hw-text-muted)' }}
-          >
-            No creators found for this specialty.
-          </p>
+          <div className="text-center py-20">
+            <p className="text-lg" style={{ color: "var(--hw-text-secondary)" }}>
+              No creators found for this specialty.
+            </p>
+          </div>
         )}
       </div>
-
-      {/* Click outside to close dropdown */}
-      {dropdownOpen && (
-        <div
-          className="fixed inset-0 z-10"
-          onClick={() => setDropdownOpen(false)}
-        />
-      )}
     </div>
   );
 }
