@@ -3,51 +3,61 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import { ArrowRight } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const sampleConditions: Record<string, { name: string; slug: string }[]> = {
+interface Condition {
+  name: string;
+  slug: string;
+  category?: string;
+  overview?: string;
+}
+
+const sampleConditions: Record<string, Condition[]> = {
   A: [
-    { name: "Asthma", slug: "asthma" },
-    { name: "Anxiety Disorders", slug: "anxiety-disorders" },
-    { name: "Arthritis", slug: "arthritis" },
-    { name: "Anemia", slug: "anemia" },
-    { name: "Allergies", slug: "allergies" },
+    { name: "Asthma", slug: "asthma", category: "Respiratory", overview: "A chronic condition that affects the airways in the lungs, causing wheezing, breathlessness, chest tightness, and coughing." },
+    { name: "Anxiety Disorders", slug: "anxiety-disorders", category: "Mental Health", overview: "A group of mental health conditions characterized by excessive worry, fear, and related behavioral disturbances." },
+    { name: "Arthritis", slug: "arthritis", category: "Musculoskeletal", overview: "Inflammation of one or more joints, causing pain and stiffness that can worsen with age." },
+    { name: "Anemia", slug: "anemia", category: "Blood", overview: "A condition where you lack enough healthy red blood cells to carry adequate oxygen to your body's tissues." },
+    { name: "Allergies", slug: "allergies", category: "Immunology", overview: "An immune system response to a foreign substance that is not typically harmful to your body." },
   ],
   B: [
-    { name: "Back Pain", slug: "back-pain" },
-    { name: "Bronchitis", slug: "bronchitis" },
-    { name: "Bipolar Disorder", slug: "bipolar-disorder" },
-    { name: "Blood Pressure", slug: "blood-pressure" },
+    { name: "Back Pain", slug: "back-pain", category: "Musculoskeletal", overview: "One of the most common reasons for missed work and doctor visits, ranging from a dull ache to sharp, debilitating pain." },
+    { name: "Bronchitis", slug: "bronchitis", category: "Respiratory", overview: "Inflammation of the lining of the bronchial tubes, which carry air to and from the lungs." },
+    { name: "Bipolar Disorder", slug: "bipolar-disorder", category: "Mental Health", overview: "A mental health condition marked by extreme mood swings including emotional highs (mania) and lows (depression)." },
+    { name: "Blood Pressure", slug: "blood-pressure", category: "Cardiovascular", overview: "The force of blood pushing against artery walls. High blood pressure can lead to serious health problems over time." },
   ],
   C: [
-    { name: "COVID-19", slug: "covid-19" },
-    { name: "COPD", slug: "copd" },
-    { name: "Celiac Disease", slug: "celiac-disease" },
-    { name: "Chronic Fatigue Syndrome", slug: "chronic-fatigue-syndrome" },
+    { name: "COVID-19", slug: "covid-19", category: "Infectious Disease", overview: "A respiratory illness caused by the SARS-CoV-2 virus, ranging from mild symptoms to severe pneumonia." },
+    { name: "COPD", slug: "copd", category: "Respiratory", overview: "Chronic obstructive pulmonary disease is a group of lung diseases that block airflow and make it difficult to breathe." },
+    { name: "Celiac Disease", slug: "celiac-disease", category: "Digestive", overview: "An immune reaction to eating gluten that damages the lining of the small intestine over time." },
+    { name: "Chronic Fatigue Syndrome", slug: "chronic-fatigue-syndrome", category: "General", overview: "A complex disorder characterized by extreme fatigue that cannot be explained by any underlying medical condition." },
   ],
   D: [
-    { name: "Diabetes", slug: "diabetes" },
-    { name: "Depression", slug: "depression" },
-    { name: "Dermatitis", slug: "dermatitis" },
-    { name: "Dementia", slug: "dementia" },
+    { name: "Diabetes", slug: "diabetes", category: "Endocrine", overview: "A group of metabolic diseases characterized by high blood sugar levels over a prolonged period." },
+    { name: "Depression", slug: "depression", category: "Mental Health", overview: "A mood disorder that causes a persistent feeling of sadness and loss of interest in daily activities." },
+    { name: "Dermatitis", slug: "dermatitis", category: "Dermatology", overview: "A general term for conditions that cause inflammation of the skin, including redness, swelling, and itching." },
+    { name: "Dementia", slug: "dementia", category: "Neurology", overview: "A decline in mental ability severe enough to interfere with daily life, affecting memory, thinking, and social skills." },
   ],
   H: [
-    { name: "Hypertension", slug: "hypertension" },
-    { name: "Heart Disease", slug: "heart-disease" },
-    { name: "Hepatitis", slug: "hepatitis" },
-    { name: "Hypothyroidism", slug: "hypothyroidism" },
+    { name: "Hypertension", slug: "hypertension", category: "Cardiovascular", overview: "A common condition where the long-term force of blood against artery walls is high enough to cause health problems." },
+    { name: "Heart Disease", slug: "heart-disease", category: "Cardiovascular", overview: "A range of conditions that affect the heart, including coronary artery disease, arrhythmias, and heart defects." },
+    { name: "Hepatitis", slug: "hepatitis", category: "Gastroenterology", overview: "Inflammation of the liver, most commonly caused by a viral infection but also by toxins, medications, and autoimmune conditions." },
+    { name: "Hypothyroidism", slug: "hypothyroidism", category: "Endocrine", overview: "A condition in which the thyroid gland does not produce enough thyroid hormones, slowing metabolism." },
   ],
   T: [
-    { name: "Thyroid Disorders", slug: "thyroid-disorders" },
-    { name: "Tinnitus", slug: "tinnitus" },
-    { name: "Tuberculosis", slug: "tuberculosis" },
-    { name: "Type 2 Diabetes", slug: "type-2-diabetes" },
+    { name: "Thyroid Disorders", slug: "thyroid-disorders", category: "Endocrine", overview: "Conditions that affect the thyroid gland, a butterfly-shaped gland in the neck that controls metabolism." },
+    { name: "Tinnitus", slug: "tinnitus", category: "ENT", overview: "The perception of noise or ringing in the ears, affecting roughly 15-20% of people." },
+    { name: "Tuberculosis", slug: "tuberculosis", category: "Infectious Disease", overview: "A potentially serious infectious disease that mainly affects the lungs, caused by Mycobacterium tuberculosis." },
+    { name: "Type 2 Diabetes", slug: "type-2-diabetes", category: "Endocrine", overview: "A chronic condition that affects the way the body processes blood sugar (glucose), often related to lifestyle factors." },
   ],
 };
 
 export function HealthAZPreview() {
   const [activeLetter, setActiveLetter] = useState("A");
+  const [selectedCondition, setSelectedCondition] = useState<Condition | null>(null);
   const conditions = sampleConditions[activeLetter] ?? [];
 
   return (
@@ -107,10 +117,10 @@ export function HealthAZPreview() {
               {conditions.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {conditions.map((condition) => (
-                    <Link
+                    <button
                       key={condition.slug}
-                      href={`/health-a-z/${condition.slug}`}
-                      className="group flex items-center gap-2 rounded-lg px-4 py-3 transition-colors duration-150"
+                      onClick={() => setSelectedCondition(condition)}
+                      className="group flex items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors duration-150 hover:ring-2 hover:ring-[var(--hw-accent)]/30"
                       style={{
                         backgroundColor: "var(--hw-surface-secondary)",
                       }}
@@ -120,12 +130,12 @@ export function HealthAZPreview() {
                         style={{ backgroundColor: "var(--hw-accent)" }}
                       />
                       <span
-                        className="text-sm font-medium font-[family-name:var(--font-body)] transition-colors duration-150 group-hover:underline"
+                        className="text-sm font-medium font-[family-name:var(--font-body)] transition-colors duration-150 group-hover:text-[var(--hw-accent)]"
                         style={{ color: "var(--hw-text-primary)" }}
                       >
                         {condition.name}
                       </span>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -157,6 +167,58 @@ export function HealthAZPreview() {
           </Link>
         </div>
       </div>
+
+      {/* Condition detail modal */}
+      <Modal
+        isOpen={!!selectedCondition}
+        onClose={() => setSelectedCondition(null)}
+        title={selectedCondition?.name ?? ""}
+      >
+        {selectedCondition && (
+          <div className="space-y-6">
+            {/* Name + category badge */}
+            <div className="flex items-center gap-3">
+              <h3
+                className="font-[family-name:var(--font-display)] text-xl font-bold"
+                style={{ color: "var(--hw-text-primary)" }}
+              >
+                {selectedCondition.name}
+              </h3>
+              {selectedCondition.category && (
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-medium"
+                  style={{
+                    backgroundColor: "rgba(13,148,136,0.1)",
+                    color: "var(--hw-accent)",
+                  }}
+                >
+                  {selectedCondition.category}
+                </span>
+              )}
+            </div>
+
+            {/* Overview */}
+            {selectedCondition.overview && (
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "var(--hw-text-secondary)" }}
+              >
+                {selectedCondition.overview}
+              </p>
+            )}
+
+            {/* CTA */}
+            <Link
+              href={`/health-a-z/${selectedCondition.slug}`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-opacity duration-150 font-[family-name:var(--font-display)] hover:opacity-90"
+              style={{ backgroundColor: "var(--hw-accent)" }}
+            >
+              View Full Details
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 }
