@@ -45,7 +45,6 @@ const navItems: NavItem[] = [
       { label: "Learning Paths", href: "/learning-paths", icon: <GraduationCap className="h-4 w-4" /> },
     ],
   },
-  { label: "Creators", href: "/creators" },
 ];
 
 function DesktopDropdown({

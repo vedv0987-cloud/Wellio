@@ -28,7 +28,6 @@ const footerColumns = [
       { label: "Health A-Z", href: "/health-a-z" },
       { label: "Lab Tests", href: "/lab-tests" },
       { label: "Glossary", href: "/glossary" },
-      { label: "Creators", href: "/creators" },
     ],
   },
   {
