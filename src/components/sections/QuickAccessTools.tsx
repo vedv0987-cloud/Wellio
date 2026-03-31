@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import {
@@ -11,15 +11,35 @@ import {
   Brain,
   Scan,
   AlertTriangle,
-  Flame,
   Droplets,
-  Wind,
-  Zap,
-  ShieldCheck,
   ArrowRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+
+/* ── gradient configs per tool ── */
+const gradients: Record<string, { bg: string; glow: string; accent: string }> = {
+  "AI Health Chat": {
+    bg: "linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%)",
+    glow: "rgba(124,58,237,0.35)",
+    accent: "#7c3aed",
+  },
+  "Symptom Checker": {
+    bg: "linear-gradient(135deg, #10b981 0%, #0d9488 100%)",
+    glow: "rgba(16,185,129,0.35)",
+    accent: "#10b981",
+  },
+  "Drug Interactions": {
+    bg: "linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)",
+    glow: "rgba(245,158,11,0.35)",
+    accent: "#f59e0b",
+  },
+  "First Aid Guide": {
+    bg: "linear-gradient(135deg, #ef4444 0%, #ec4899 100%)",
+    glow: "rgba(239,68,68,0.35)",
+    accent: "#ef4444",
+  },
+};
 
 interface ToolCard {
   title: string;
@@ -76,9 +96,9 @@ const tools: ToolCard[] = [
               key={q}
               className="inline-block rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
-                backgroundColor: "var(--hw-surface-secondary)",
-                color: "var(--hw-text-secondary)",
-                border: "1px solid var(--hw-border)",
+                backgroundColor: "rgba(124,58,237,0.08)",
+                color: "#7c3aed",
+                border: "1px solid rgba(124,58,237,0.2)",
               }}
             >
               {q}
@@ -112,11 +132,11 @@ const tools: ToolCard[] = [
                 key={r.label}
                 className="flex flex-col items-center gap-2 rounded-xl p-3"
                 style={{
-                  backgroundColor: "var(--hw-surface-secondary)",
-                  border: "1px solid var(--hw-border)",
+                  backgroundColor: "rgba(16,185,129,0.06)",
+                  border: "1px solid rgba(16,185,129,0.2)",
                 }}
               >
-                <Icon size={24} style={{ color: "var(--hw-accent)" }} />
+                <Icon size={24} style={{ color: "#10b981" }} />
                 <span
                   className="text-xs font-medium"
                   style={{ color: "var(--hw-text-secondary)" }}
@@ -139,10 +159,17 @@ const tools: ToolCard[] = [
       "Enter two or more medications to instantly check for potentially dangerous interactions. See severity levels, alternative suggestions, and consult notes to bring to your doctor.",
     ctaLabel: "Check Drug Interactions",
     extras: (
-      <div className="flex items-center gap-3 rounded-xl p-4" style={{ backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
+      <div
+        className="flex items-center gap-3 rounded-xl p-4"
+        style={{
+          backgroundColor: "rgba(245,158,11,0.08)",
+          border: "1px solid rgba(245,158,11,0.2)",
+        }}
+      >
         <AlertTriangle size={20} style={{ color: "#D97706" }} />
         <p className="text-sm" style={{ color: "var(--hw-text-secondary)" }}>
-          Always verify interactions with your pharmacist or physician before making changes.
+          Always verify interactions with your pharmacist or physician before
+          making changes.
         </p>
       </div>
     ),
@@ -168,7 +195,10 @@ const tools: ToolCard[] = [
             <li key={proc} className="flex items-center gap-2.5">
               <span
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                style={{ backgroundColor: "var(--hw-accent)" }}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #ef4444 0%, #ec4899 100%)",
+                }}
               >
                 {i + 1}
               </span>
@@ -190,19 +220,71 @@ const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.06,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
+    transition: { duration: 0.5, ease: "easeOut" as const },
   },
 };
+
+/* ── 3D tilt card wrapper ── */
+function TiltCard({
+  children,
+  glowColor,
+  onClick,
+}: {
+  children: React.ReactNode;
+  glowColor: string;
+  onClick: () => void;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -4;
+    const rotateY = ((x - centerX) / centerX) * 4;
+    el.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    el.style.boxShadow = `0 0 20px ${glowColor}, 0 8px 32px rgba(0,0,0,0.08)`;
+  };
+
+  const handleMouseLeave = () => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+    el.style.boxShadow = "0 2px 12px rgba(0,0,0,0.04)";
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="cursor-pointer rounded-xl p-6 text-left transition-all duration-200"
+      style={{
+        backgroundColor: "var(--hw-surface)",
+        border: "1px solid var(--hw-border)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+        transformStyle: "preserve-3d",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export function QuickAccessTools() {
   const [activeTool, setActiveTool] = useState<ToolCard | null>(null);
@@ -230,32 +312,19 @@ export function QuickAccessTools() {
         >
           {tools.map((tool) => {
             const Icon = tool.icon;
+            const g = gradients[tool.title];
             return (
               <motion.div key={tool.title} variants={cardVariants}>
-                <button
+                <TiltCard
+                  glowColor={g.glow}
                   onClick={() => setActiveTool(tool)}
-                  className="group flex h-full w-full flex-col rounded-xl p-6 text-left transition-shadow duration-200"
-                  style={{
-                    backgroundColor: "var(--hw-surface)",
-                    border: "1px solid var(--hw-border)",
-                    borderLeft: "4px solid var(--hw-accent)",
-                  }}
                 >
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    className="flex h-full flex-col"
-                  >
+                  <div className="flex h-full flex-col">
                     <div
-                      className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg"
-                      style={{
-                        backgroundColor: "rgba(13,148,136,0.1)",
-                      }}
+                      className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl shadow-sm"
+                      style={{ background: g.bg }}
                     >
-                      <Icon
-                        size={28}
-                        style={{ color: "var(--hw-accent)" }}
-                      />
+                      <Icon size={26} className="text-white" />
                     </div>
                     <h3
                       className="mb-1.5 font-[family-name:var(--font-display)] text-lg font-semibold"
@@ -269,8 +338,8 @@ export function QuickAccessTools() {
                     >
                       {tool.description}
                     </p>
-                  </motion.div>
-                </button>
+                  </div>
+                </TiltCard>
               </motion.div>
             );
           })}
@@ -283,38 +352,44 @@ export function QuickAccessTools() {
         onClose={() => setActiveTool(null)}
         title={activeTool?.title ?? ""}
       >
-        {activeTool && (
-          <div className="space-y-6">
-            {/* Icon + description */}
-            <div className="flex items-start gap-4">
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl"
-                style={{ backgroundColor: "rgba(13,148,136,0.12)" }}
-              >
-                <activeTool.icon size={30} style={{ color: "var(--hw-accent)" }} />
+        {activeTool && (() => {
+          const g = gradients[activeTool.title];
+          return (
+            <div className="space-y-6">
+              {/* Icon + description */}
+              <div className="flex items-start gap-4">
+                <div
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl shadow-md"
+                  style={{ background: g.bg }}
+                >
+                  <activeTool.icon size={30} className="text-white" />
+                </div>
+                <p
+                  className="text-sm leading-relaxed font-[family-name:var(--font-body)]"
+                  style={{ color: "var(--hw-text-secondary)" }}
+                >
+                  {activeTool.modalDescription}
+                </p>
               </div>
-              <p
-                className="text-sm leading-relaxed font-[family-name:var(--font-body)]"
-                style={{ color: "var(--hw-text-secondary)" }}
+
+              {/* Extra content */}
+              {activeTool.extras}
+
+              {/* CTA */}
+              <Link
+                href={activeTool.href}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all duration-200 font-[family-name:var(--font-display)] hover:opacity-90"
+                style={{
+                  background: g.bg,
+                  boxShadow: `0 4px 16px ${g.glow}`,
+                }}
               >
-                {activeTool.modalDescription}
-              </p>
+                {activeTool.ctaLabel}
+                <ArrowRight size={16} />
+              </Link>
             </div>
-
-            {/* Extra content */}
-            {activeTool.extras}
-
-            {/* CTA */}
-            <Link
-              href={activeTool.href}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-opacity duration-150 font-[family-name:var(--font-display)] hover:opacity-90"
-              style={{ backgroundColor: "var(--hw-accent)" }}
-            >
-              {activeTool.ctaLabel}
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
     </section>
   );

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+
+const SmoothScroll = dynamic(
+  () => import("@/components/animations/SmoothScroll"),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: "HealthWise — Your Complete Health Knowledge Hub",
@@ -52,14 +58,16 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen antialiased">
-        <a href="#main-content" className="skip-to-content">
-          Skip to content
-        </a>
-        <Navbar />
-        <main id="main-content" className="min-h-[calc(100vh-160px)]">
-          {children}
-        </main>
-        <Footer />
+        <SmoothScroll>
+          <a href="#main-content" className="skip-to-content">
+            Skip to content
+          </a>
+          <Navbar />
+          <main id="main-content" className="min-h-[calc(100vh-160px)]">
+            {children}
+          </main>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );
