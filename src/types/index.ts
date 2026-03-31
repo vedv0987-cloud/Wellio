@@ -22,7 +22,7 @@ export interface Condition {
   isCurable: boolean;
   relatedConditionIds: string[];
   sourceVideos: SourceVideo[];
-  trustedSources: TrustedSource[];
+  trustedSources?: TrustedSource[];
   lastReviewedDate: string;
   lastReviewedBy: string;
   createdAt: string;

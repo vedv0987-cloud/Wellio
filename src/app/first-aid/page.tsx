@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   HeartPulse,
   AlertTriangle,
@@ -10,7 +10,6 @@ import {
   Bone,
   Brain,
   Phone,
-  ChevronDown,
   ShieldAlert,
   Snowflake,
   Bug,
@@ -19,6 +18,7 @@ import {
   Zap,
   Baby,
 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 
 interface ProcedureStep {
   step: number;
@@ -263,11 +263,7 @@ const procedures: Procedure[] = [
 ];
 
 export default function FirstAidPage() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
+  const [selectedProcedure, setSelectedProcedure] = useState<Procedure | null>(null);
 
   return (
     <div
@@ -334,127 +330,144 @@ export default function FirstAidPage() {
 
         {/* Procedure Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {procedures.map((procedure, idx) => {
-            const isExpanded = expandedId === procedure.id;
+          {procedures.map((procedure, idx) => (
+            <motion.button
+              key={procedure.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: idx * 0.04 }}
+              whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(239,68,68,0.15)" }}
+              onClick={() => setSelectedProcedure(procedure)}
+              className="rounded-xl border p-5 text-left transition-all duration-200 hover:border-red-400/50 group"
+              style={{
+                backgroundColor: "var(--hw-surface)",
+                borderColor: "var(--hw-border)",
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+                  style={{
+                    background: procedure.timeCritical
+                      ? "linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))"
+                      : "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))",
+                    color: procedure.timeCritical ? "#ef4444" : "#f59e0b",
+                  }}
+                >
+                  {procedure.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="text-base font-semibold font-[family-name:var(--font-display)]" style={{ color: "var(--hw-text-primary)" }}>
+                      {procedure.title}
+                    </h3>
+                  </div>
+                  {procedure.timeCritical && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/15 text-red-400">
+                      <AlertTriangle className="w-3 h-3" />
+                      Time Critical
+                    </span>
+                  )}
+                  <p className="text-xs mt-1" style={{ color: "var(--hw-text-muted)" }}>
+                    {procedure.steps.length} steps — Click to view
+                  </p>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
 
-            return (
-              <motion.div
-                key={procedure.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: idx * 0.04 }}
-                layout
-                className={`rounded-xl border transition-all duration-200 ${
-                  isExpanded ? "md:col-span-2 lg:col-span-3" : ""
-                }`}
+        {/* Procedure Detail Modal */}
+        <Modal
+          isOpen={!!selectedProcedure}
+          onClose={() => setSelectedProcedure(null)}
+          title={selectedProcedure?.title ?? ""}
+          size="lg"
+        >
+          {selectedProcedure && (
+            <div className="space-y-5">
+              {/* Header with icon */}
+              <div className="flex items-center gap-4 pb-4" style={{ borderBottom: "1px solid var(--hw-border)" }}>
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))",
+                    color: "#ef4444",
+                  }}
+                >
+                  {selectedProcedure.icon}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold font-[family-name:var(--font-display)]" style={{ color: "var(--hw-text-primary)" }}>
+                    {selectedProcedure.title}
+                  </h3>
+                  {selectedProcedure.timeCritical && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 mt-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Time Critical — Act Immediately
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Emergency banner */}
+              <div
+                className="p-4 rounded-xl flex items-center gap-3"
                 style={{
-                  backgroundColor: "var(--hw-surface)",
-                  borderColor: isExpanded ? "rgba(239, 68, 68, 0.5)" : "var(--hw-border)",
+                  background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04))",
+                  border: "1px solid rgba(239,68,68,0.2)",
                 }}
               >
-                {/* Card Header */}
-                <button
-                  onClick={() => toggleExpand(procedure.id)}
-                  className="w-full flex items-center gap-4 p-5 text-left cursor-pointer min-h-[72px]"
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                    style={{
-                      backgroundColor: "rgba(239, 68, 68, 0.1)",
-                      color: "#ef4444",
-                    }}
+                <Phone className="w-5 h-5 text-red-500 shrink-0" />
+                <p className="text-sm font-medium" style={{ color: "var(--hw-text-primary)" }}>
+                  Emergency: <span className="text-red-500 font-bold">112</span> (India) | <span className="text-red-500 font-bold">911</span> (US) | <span className="text-red-500 font-bold">999</span> (UK)
+                </p>
+              </div>
+
+              {/* Steps */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--hw-text-muted)" }}>
+                  Step-by-Step Instructions
+                </h4>
+                {selectedProcedure.steps.map((s, i) => (
+                  <motion.div
+                    key={s.step}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="flex gap-3"
                   >
-                    {procedure.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-lg font-semibold">{procedure.title}</h3>
-                      {procedure.timeCritical && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400">
-                          <AlertTriangle className="w-3 h-3" />
-                          Time Critical
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronDown
-                    className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                      isExpanded ? "rotate-180" : ""
-                    }`}
-                    style={{ color: "var(--hw-text-secondary)" }}
-                  />
-                </button>
-
-                {/* Expanded Steps */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
                     >
-                      <div
-                        className="px-5 pb-5 pt-0 border-t"
-                        style={{ borderColor: "var(--hw-border)" }}
-                      >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                          {procedure.steps.map((s) => (
-                            <div key={s.step} className="flex gap-3">
-                              <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-white"
-                                style={{ backgroundColor: "#ef4444" }}
-                              >
-                                {s.step}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm leading-relaxed">
-                                  {s.instruction}
-                                </p>
-                                {s.important && (
-                                  <div
-                                    className="mt-2 p-3 rounded-lg border text-sm"
-                                    style={{
-                                      backgroundColor: "rgba(239, 68, 68, 0.06)",
-                                      borderColor: "rgba(239, 68, 68, 0.2)",
-                                    }}
-                                  >
-                                    <div className="flex items-start gap-2">
-                                      <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                                      <span className="text-red-400 font-medium">
-                                        {s.important}
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Emergency Reminder */}
+                      {s.step}
+                    </div>
+                    <div className="flex-1 pt-0.5">
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
+                        {s.instruction}
+                      </p>
+                      {s.important && (
                         <div
-                          className="mt-5 p-4 rounded-lg flex items-center gap-3"
+                          className="mt-2 p-3 rounded-lg text-sm"
                           style={{
-                            backgroundColor: "rgba(239, 68, 68, 0.08)",
+                            backgroundColor: "rgba(239,68,68,0.06)",
+                            border: "1px solid rgba(239,68,68,0.15)",
                           }}
                         >
-                          <Phone className="w-5 h-5 text-red-500 shrink-0" />
-                          <p className="text-sm font-medium">
-                            In any emergency, call{" "}
-                            <span className="text-red-400 font-bold">112</span> (India) or{" "}
-                            <span className="text-red-400 font-bold">911</span> (US) immediately.
-                          </p>
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                            <span className="text-red-400 font-medium">{s.important}</span>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Modal>
       </div>
     </div>
   );

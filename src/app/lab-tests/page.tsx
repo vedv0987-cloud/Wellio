@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
+import { Modal } from "@/components/ui/Modal";
 import {
   Search,
   X,
-  ChevronDown,
   Droplets,
   Heart,
   Activity,
@@ -301,7 +301,7 @@ const labTests: LabTest[] = [
 export default function LabTestsPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<TestCategory>("All");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedTest, setSelectedTest] = useState<typeof labTests[number] | null>(null);
 
   const filtered = useMemo(() => {
     let list = [...labTests];
@@ -322,10 +322,6 @@ export default function LabTestsPage() {
 
     return list;
   }, [search, activeCategory]);
-
-  const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
 
   return (
     <div
@@ -422,191 +418,119 @@ export default function LabTestsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((test, idx) => {
-              const isExpanded = expandedId === test.id;
-
-              return (
-                <motion.div
-                  key={test.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: idx * 0.04 }}
-                  layout
-                  className={`rounded-xl border transition-all duration-200 ${
-                    isExpanded ? "md:col-span-2 lg:col-span-3" : ""
-                  }`}
-                  style={{
-                    backgroundColor: "var(--hw-surface)",
-                    borderColor: isExpanded ? "var(--hw-accent)" : "var(--hw-border)",
-                  }}
-                >
-                  {/* Card Header */}
-                  <button
-                    onClick={() => toggleExpand(test.id)}
-                    className="w-full flex items-center gap-4 p-5 text-left cursor-pointer"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" key="grid">
+            {filtered.map((test, idx) => (
+              <motion.button
+                key={test.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.04 }}
+                whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(13,148,136,0.12)" }}
+                onClick={() => setSelectedTest(test)}
+                className="rounded-xl border p-5 text-left transition-all hover:border-[var(--hw-accent)] group"
+                style={{
+                  backgroundColor: "var(--hw-surface)",
+                  borderColor: "var(--hw-border)",
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+                    style={{
+                      backgroundColor: "color-mix(in srgb, var(--hw-accent) 15%, transparent)",
+                      color: "var(--hw-accent)",
+                    }}
                   >
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        backgroundColor: "color-mix(in srgb, var(--hw-accent) 15%, transparent)",
-                        color: "var(--hw-accent)",
-                      }}
-                    >
-                      {test.icon}
+                    {test.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-semibold truncate font-[family-name:var(--font-display)]">{test.name}</h3>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {test.category.map((cat) => (
+                        <span key={cat} className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: "var(--hw-surface-secondary)", color: "var(--hw-text-secondary)" }}>
+                          {cat}
+                        </span>
+                      ))}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold truncate">{test.name}</h3>
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        {test.category.map((cat) => (
-                          <span
-                            key={cat}
-                            className="px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: "var(--hw-surface-secondary)",
-                              color: "var(--hw-text-secondary)",
-                            }}
-                          >
-                            {cat}
-                          </span>
-                        ))}
-                      </div>
-                      {!isExpanded && (
-                        <p
-                          className="text-sm mt-2 line-clamp-1 leading-relaxed"
-                          style={{ color: "var(--hw-text-muted)" }}
-                        >
-                          {test.whatItChecks}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
-                      style={{ color: "var(--hw-text-secondary)" }}
-                    />
-                  </button>
-
-                  {/* Expanded Content */}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div
-                          className="px-5 pb-5 pt-0 border-t"
-                          style={{ borderColor: "var(--hw-border)" }}
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-                            {/* What It Checks */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>
-                                What It Checks
-                              </h4>
-                              <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
-                                {test.whatItChecks}
-                              </p>
-                            </div>
-
-                            {/* Why Ordered */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>
-                                Why It Is Ordered
-                              </h4>
-                              <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
-                                {test.whyOrdered}
-                              </p>
-                            </div>
-
-                            {/* Preparation */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>
-                                Preparation
-                              </h4>
-                              <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
-                                {test.preparation}
-                              </p>
-                            </div>
-
-                            {/* What to Expect */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>
-                                What to Expect
-                              </h4>
-                              <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
-                                {test.whatToExpect}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Normal Ranges Table */}
-                          <div className="mt-6">
-                            <h4 className="text-sm font-semibold mb-3" style={{ color: "var(--hw-accent)" }}>
-                              Normal Ranges
-                            </h4>
-                            <div
-                              className="rounded-lg border overflow-hidden"
-                              style={{ borderColor: "var(--hw-border)" }}
-                            >
-                              <table className="w-full text-sm">
-                                <thead>
-                                  <tr style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
-                                    <th className="text-left px-4 py-2.5 font-semibold">Component</th>
-                                    <th className="text-left px-4 py-2.5 font-semibold">Range</th>
-                                    <th className="text-left px-4 py-2.5 font-semibold">Unit</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {test.normalRanges.map((range, i) => (
-                                    <tr
-                                      key={i}
-                                      className="border-t"
-                                      style={{ borderColor: "var(--hw-border)" }}
-                                    >
-                                      <td className="px-4 py-2.5">{range.component}</td>
-                                      <td className="px-4 py-2.5 font-medium" style={{ color: "var(--hw-accent)" }}>
-                                        {range.range}
-                                      </td>
-                                      <td className="px-4 py-2.5" style={{ color: "var(--hw-text-secondary)" }}>
-                                        {range.unit}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-
-                          {/* Abnormal Meaning */}
-                          <div className="mt-5">
-                            <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>
-                              What Abnormal Results May Mean
-                            </h4>
-                            <div
-                              className="p-4 rounded-lg border text-sm leading-relaxed"
-                              style={{
-                                backgroundColor: "var(--hw-surface-secondary)",
-                                borderColor: "var(--hw-border)",
-                                color: "var(--hw-text-secondary)",
-                              }}
-                            >
-                              {test.abnormalMeaning}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
+                    <p className="text-sm mt-2 line-clamp-1" style={{ color: "var(--hw-text-muted)" }}>{test.whatItChecks}</p>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
           </div>
         )}
+
+        {/* Lab Test Detail Modal */}
+        <Modal isOpen={!!selectedTest} onClose={() => setSelectedTest(null)} title={selectedTest?.name ?? ""} size="xl">
+          {selectedTest && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center gap-4 pb-4" style={{ borderBottom: "1px solid var(--hw-border)" }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "color-mix(in srgb, var(--hw-accent) 15%, transparent)", color: "var(--hw-accent)" }}>
+                    {selectedTest.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold font-[family-name:var(--font-display)]">{selectedTest.name}</h3>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {selectedTest.category.map((cat) => (
+                        <span key={cat} className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: "var(--hw-surface-secondary)", color: "var(--hw-text-secondary)" }}>{cat}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="rounded-xl p-4" style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
+                    <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>What It Checks</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{selectedTest.whatItChecks}</p>
+                  </div>
+                  <div className="rounded-xl p-4" style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
+                    <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>Why It Is Ordered</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{selectedTest.whyOrdered}</p>
+                  </div>
+                  <div className="rounded-xl p-4" style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
+                    <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>Preparation</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{selectedTest.preparation}</p>
+                  </div>
+                  <div className="rounded-xl p-4" style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
+                    <h4 className="text-sm font-semibold mb-2" style={{ color: "var(--hw-accent)" }}>What to Expect</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{selectedTest.whatToExpect}</p>
+                  </div>
+                </div>
+
+                {/* Normal Ranges Table */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3" style={{ color: "var(--hw-accent)" }}>Normal Ranges</h4>
+                  <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--hw-border)" }}>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr style={{ backgroundColor: "var(--hw-surface-secondary)" }}>
+                          <th className="text-left px-4 py-2.5 font-semibold">Component</th>
+                          <th className="text-left px-4 py-2.5 font-semibold">Range</th>
+                          <th className="text-left px-4 py-2.5 font-semibold">Unit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedTest.normalRanges.map((range, i) => (
+                          <tr key={i} className="border-t" style={{ borderColor: "var(--hw-border)" }}>
+                            <td className="px-4 py-2.5">{range.component}</td>
+                            <td className="px-4 py-2.5 font-medium" style={{ color: "var(--hw-accent)" }}>{range.range}</td>
+                            <td className="px-4 py-2.5" style={{ color: "var(--hw-text-secondary)" }}>{range.unit}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Abnormal Meaning */}
+                <div className="p-4 rounded-xl border" style={{ backgroundColor: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.2)" }}>
+                  <h4 className="text-sm font-semibold mb-2" style={{ color: "#f59e0b" }}>What Abnormal Results May Mean</h4>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{selectedTest.abnormalMeaning}</p>
+                </div>
+              </div>
+          )}
+        </Modal>
       </div>
     </div>
   );
