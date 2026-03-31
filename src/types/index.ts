@@ -22,6 +22,7 @@ export interface Condition {
   isCurable: boolean;
   relatedConditionIds: string[];
   sourceVideos: SourceVideo[];
+  trustedSources: TrustedSource[];
   lastReviewedDate: string;
   lastReviewedBy: string;
   createdAt: string;
@@ -105,6 +106,14 @@ export interface VisualSlide {
   title: string;
   description: string;
   imageUrl: string;
+}
+
+export interface TrustedSource {
+  name: string;
+  organization: string;
+  url: string;
+  description: string;
+  badge: "WHO" | "FDA" | "NIH" | "CDC" | "Mayo Clinic" | "Cleveland Clinic" | "MedlinePlus" | "NHS" | "WebMD";
 }
 
 export interface SourceVideo {

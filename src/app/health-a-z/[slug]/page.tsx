@@ -312,6 +312,40 @@ export default function ConditionDetailPage() {
                 {formatDate(condition.lastReviewedDate)}
               </span>
             </p>
+
+            {/* Trust verification banner */}
+            {condition.trustedSources && condition.trustedSources.length > 0 && (
+              <div
+                className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3"
+                style={{
+                  backgroundColor: "rgba(13,148,136,0.05)",
+                  borderColor: "rgba(13,148,136,0.2)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
+                  <span className="text-xs font-semibold" style={{ color: "var(--hw-accent)" }}>
+                    Medically Verified
+                  </span>
+                </div>
+                <span className="text-xs" style={{ color: "var(--hw-text-muted)" }}>|</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {condition.trustedSources.slice(0, 4).map((s, i) => (
+                    <span key={i} className="rounded-full bg-white/80 dark:bg-white/10 px-2 py-0.5 text-[10px] font-bold" style={{ color: "var(--hw-text-secondary)" }}>
+                      {s.badge}
+                    </span>
+                  ))}
+                  {condition.trustedSources.length > 4 && (
+                    <span className="text-[10px]" style={{ color: "var(--hw-text-muted)" }}>
+                      +{condition.trustedSources.length - 4} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </motion.div>
         </Section>
 
@@ -841,7 +875,77 @@ export default function ConditionDetailPage() {
           </Section>
         )}
 
-        {/* ===================== SOURCES ===================== */}
+        {/* ===================== TRUSTED SOURCES ===================== */}
+        {condition.trustedSources && condition.trustedSources.length > 0 && (
+          <Section title="Trusted Medical Sources" delay={0.05}>
+            <div
+              className="rounded-xl border p-5 mb-4"
+              style={{
+                backgroundColor: "var(--hw-surface)",
+                borderColor: "var(--hw-border)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: "rgba(13,148,136,0.15)" }}
+                >
+                  <BookOpen className="h-4 w-4" style={{ color: "var(--hw-accent)" }} />
+                </div>
+                <p className="text-sm" style={{ color: "var(--hw-text-secondary)" }}>
+                  This information is sourced from globally recognized medical authorities
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {condition.trustedSources.map((source, idx) => {
+                  const badgeColors: Record<string, { bg: string; text: string }> = {
+                    WHO: { bg: "bg-blue-500/15", text: "text-blue-500" },
+                    FDA: { bg: "bg-emerald-500/15", text: "text-emerald-500" },
+                    NIH: { bg: "bg-indigo-500/15", text: "text-indigo-500" },
+                    CDC: { bg: "bg-orange-500/15", text: "text-orange-500" },
+                    "Mayo Clinic": { bg: "bg-sky-500/15", text: "text-sky-500" },
+                    "Cleveland Clinic": { bg: "bg-teal-500/15", text: "text-teal-500" },
+                    MedlinePlus: { bg: "bg-green-500/15", text: "text-green-500" },
+                    NHS: { bg: "bg-blue-600/15", text: "text-blue-600" },
+                    WebMD: { bg: "bg-cyan-500/15", text: "text-cyan-500" },
+                  };
+                  const bc = badgeColors[source.badge] || { bg: "bg-gray-500/15", text: "text-gray-500" };
+                  return (
+                    <a
+                      key={idx}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-md"
+                      style={{
+                        borderColor: "var(--hw-border)",
+                        backgroundColor: "var(--hw-surface-secondary)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${bc.bg} ${bc.text}`}>
+                          {source.badge}
+                        </span>
+                        <ExternalLink
+                          className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100"
+                          style={{ color: "var(--hw-accent)" }}
+                        />
+                      </div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--hw-text-primary)" }}>
+                        {source.name}
+                      </p>
+                      <p className="text-xs leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>
+                        {source.description}
+                      </p>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {/* ===================== VIDEO SOURCES ===================== */}
         {condition.sourceVideos.length > 0 && (
           <Section delay={0.05}>
             <div
