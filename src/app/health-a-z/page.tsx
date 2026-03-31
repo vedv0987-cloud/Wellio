@@ -4,8 +4,41 @@ import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Search, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { conditions } from "@/data/conditions";
+import { conditions as detailedConditions } from "@/data/conditions";
 import type { ConditionCategory } from "@/types";
+
+// Try importing extended conditions - will be available once the data file is created
+let extendedConditions: { slug: string; name: string; category: string; severity: string; overview: string }[] = [];
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const ext = require("@/data/conditions-extended");
+  extendedConditions = ext.conditionsExtended || [];
+} catch {
+  // Extended conditions file not yet available
+}
+
+// Merge: detailed conditions take priority, add extended ones that aren't duplicates
+const detailedSlugs = new Set(detailedConditions.map(c => c.slug));
+const allConditions = [
+  ...detailedConditions.map(c => ({
+    slug: c.slug,
+    name: c.name,
+    category: c.category,
+    severity: c.severity,
+    overview: c.overview,
+    hasDetailPage: true,
+  })),
+  ...extendedConditions
+    .filter(c => !detailedSlugs.has(c.slug))
+    .map(c => ({
+      slug: c.slug,
+      name: c.name,
+      category: c.category as ConditionCategory,
+      severity: c.severity as "mild" | "moderate" | "severe" | "critical",
+      overview: c.overview,
+      hasDetailPage: false,
+    })),
+];
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -73,7 +106,7 @@ export default function HealthAZPage() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const filtered = useMemo(() => {
-    let list = [...conditions];
+    let list = [...allConditions];
 
     if (activeFilter === "common") {
       list = list.filter((c) => COMMON_CATEGORIES.includes(c.category));
@@ -137,7 +170,7 @@ export default function HealthAZPage() {
             className="mx-auto max-w-xl text-lg"
             style={{ color: "var(--hw-text-secondary)" }}
           >
-            200+ conditions explained with expert videos
+            {allConditions.length}+ conditions explained with expert videos
           </p>
         </motion.div>
 
@@ -296,7 +329,7 @@ export default function HealthAZPage() {
                       };
                       return (
                         <motion.div
-                          key={condition.id}
+                          key={condition.slug}
                           initial={{ opacity: 0, y: 16 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{
@@ -305,7 +338,7 @@ export default function HealthAZPage() {
                           }}
                         >
                           <Link
-                            href={`/health-a-z/${condition.slug}`}
+                            href={condition.hasDetailPage ? `/health-a-z/${condition.slug}` : `/search?q=${encodeURIComponent(condition.name)}`}
                             className="group flex h-full flex-col rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                             style={{
                               backgroundColor: "var(--hw-surface)",
