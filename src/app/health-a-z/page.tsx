@@ -5,17 +5,8 @@ import Link from "next/link";
 import { Search, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { conditions as detailedConditions } from "@/data/conditions";
+import { conditionsExtended } from "@/data/conditions-extended";
 import type { ConditionCategory } from "@/types";
-
-// Try importing extended conditions - will be available once the data file is created
-let extendedConditions: { slug: string; name: string; category: string; severity: string; overview: string }[] = [];
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const ext = require("@/data/conditions-extended");
-  extendedConditions = ext.conditionsExtended || [];
-} catch {
-  // Extended conditions file not yet available
-}
 
 // Merge: detailed conditions take priority, add extended ones that aren't duplicates
 const detailedSlugs = new Set(detailedConditions.map(c => c.slug));
@@ -28,7 +19,7 @@ const allConditions = [
     overview: c.overview,
     hasDetailPage: true,
   })),
-  ...extendedConditions
+  ...conditionsExtended
     .filter(c => !detailedSlugs.has(c.slug))
     .map(c => ({
       slug: c.slug,
