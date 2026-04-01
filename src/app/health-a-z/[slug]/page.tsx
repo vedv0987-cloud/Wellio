@@ -20,6 +20,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { conditions } from "@/data/conditions";
+import { conditionsExtended } from "@/data/conditions-extended";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -154,6 +155,7 @@ export default function ConditionDetailPage() {
   const params = useParams();
   const slug = params?.slug as string | undefined;
   const condition = conditions.find((c) => c.slug === slug);
+  const extCondition = !condition ? conditionsExtended.find((c) => c.slug === slug) : null;
 
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TreatmentTab>("medications");
@@ -161,6 +163,93 @@ export default function ConditionDetailPage() {
     new Set()
   );
   const [sourcesOpen, setSourcesOpen] = useState(false);
+
+  /* ---- Extended condition (summary view) ---- */
+  if (!condition && extCondition) {
+    const catColor = CATEGORY_COLORS[extCondition.category] || { bg: "bg-gray-500/15", text: "text-gray-400" };
+    return (
+      <div style={{ backgroundColor: "var(--hw-bg)", color: "var(--hw-text-primary)" }} className="min-h-screen">
+        <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+          <Link href="/health-a-z" className="inline-flex items-center gap-2 text-sm font-medium mb-8" style={{ color: "var(--hw-accent)" }}>
+            <ArrowLeft className="h-4 w-4" /> Back to Health A-Z
+          </Link>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="mb-2 font-[family-name:var(--font-display)] text-4xl font-bold">{extCondition.name}</h1>
+            {extCondition.nameHindi && <p className="text-lg mb-4" style={{ color: "var(--hw-text-muted)" }}>{extCondition.nameHindi}</p>}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <span className={`rounded-full px-3 py-1 text-sm font-medium ${catColor.bg} ${catColor.text}`}>{formatCategory(extCondition.category)}</span>
+              <span className="flex items-center gap-1.5">
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${SEVERITY_DOT[extCondition.severity] || "bg-gray-400"}`} />
+                <span className={`text-sm font-medium ${SEVERITY_TEXT[extCondition.severity] || "text-gray-400"}`}>{capitalize(extCondition.severity)}</span>
+              </span>
+            </div>
+            {/* Trust source badge */}
+            <div className="flex items-center gap-2 mb-6 rounded-xl border px-4 py-3" style={{ backgroundColor: "rgba(13,148,136,0.05)", borderColor: "rgba(13,148,136,0.2)" }}>
+              <span className="text-xs font-semibold" style={{ color: "var(--hw-accent)" }}>Source: {extCondition.sourceOrg}</span>
+              <a href={extCondition.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs underline" style={{ color: "var(--hw-accent)" }}>
+                View on {extCondition.sourceOrg} <ExternalLink className="inline h-3 w-3" />
+              </a>
+            </div>
+          </motion.div>
+          {/* Overview */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
+            <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-4">Overview</h2>
+            <p className="text-lg leading-relaxed" style={{ color: "var(--hw-text-secondary)" }}>{extCondition.overview}</p>
+          </motion.div>
+          {/* Quick Facts */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <div className="rounded-xl border p-4 text-center" style={{ backgroundColor: "var(--hw-surface)", borderColor: "var(--hw-border)" }}>
+              <Users className="mx-auto mb-2 h-6 w-6" style={{ color: "var(--hw-accent)" }} />
+              <div className="text-2xl font-bold">{extCondition.affectedPercentage}%</div>
+              <div className="text-xs" style={{ color: "var(--hw-text-muted)" }}>Affected</div>
+            </div>
+            <div className="rounded-xl border p-4 text-center" style={{ backgroundColor: "var(--hw-surface)", borderColor: "var(--hw-border)" }}>
+              <Clock className="mx-auto mb-2 h-6 w-6" style={{ color: "var(--hw-accent)" }} />
+              <div className="text-lg font-bold">{extCondition.commonAgeGroup}</div>
+              <div className="text-xs" style={{ color: "var(--hw-text-muted)" }}>Age Group</div>
+            </div>
+            <div className="rounded-xl border p-4 text-center" style={{ backgroundColor: "var(--hw-surface)", borderColor: "var(--hw-border)" }}>
+              <Heart className="mx-auto mb-2 h-6 w-6" style={{ color: "var(--hw-accent)" }} />
+              <div className="text-lg font-bold">{extCondition.isCurable ? "Curable" : "Manageable"}</div>
+              <div className="text-xs" style={{ color: "var(--hw-text-muted)" }}>Prognosis</div>
+            </div>
+          </motion.div>
+          {/* Key Symptoms */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-8">
+            <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-4">Key Symptoms</h2>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {extCondition.keySymptoms.map((s, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border p-4" style={{ backgroundColor: "var(--hw-surface)", borderColor: "var(--hw-border)" }}>
+                  <Activity className="h-5 w-5 shrink-0" style={{ color: "var(--hw-accent)" }} />
+                  <span className="text-sm">{s}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          {/* Common Treatments */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-8">
+            <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] mb-4">Common Treatments</h2>
+            <div className="space-y-3">
+              {extCondition.commonTreatments.map((t, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border p-4" style={{ backgroundColor: "var(--hw-surface)", borderColor: "var(--hw-border)" }}>
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(13,148,136,0.1)" }}>
+                    <span className="text-sm font-bold" style={{ color: "var(--hw-accent)" }}>{i + 1}</span>
+                  </div>
+                  <span className="text-sm">{t}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          {/* Medical Disclaimer */}
+          <div className="rounded-xl border p-4 mt-8" style={{ backgroundColor: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.2)" }}>
+            <p className="text-xs" style={{ color: "var(--hw-text-muted)" }}>
+              This information is for educational purposes only. Always consult a qualified healthcare professional for medical advice.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ---- not found state ---- */
   if (!condition) {

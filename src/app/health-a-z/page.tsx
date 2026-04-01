@@ -33,13 +33,19 @@ const allConditions = [
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-type FilterKey = "all" | "common" | "chronic" | "mental_health" | "womens_health";
+type FilterKey = "all" | "common" | "chronic" | "mental_health" | "womens_health" | "heart" | "respiratory" | "digestive" | "skin" | "cancer" | "infectious";
 
 const FILTER_CHIPS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
   { key: "common", label: "Common" },
   { key: "chronic", label: "Chronic" },
+  { key: "heart", label: "Heart & Blood" },
+  { key: "respiratory", label: "Respiratory" },
+  { key: "digestive", label: "Digestive" },
   { key: "mental_health", label: "Mental Health" },
+  { key: "skin", label: "Skin" },
+  { key: "cancer", label: "Cancer" },
+  { key: "infectious", label: "Infectious" },
   { key: "womens_health", label: "Women's Health" },
 ];
 
@@ -107,6 +113,18 @@ export default function HealthAZPage() {
       list = list.filter((c) => c.category === "mental_health");
     } else if (activeFilter === "womens_health") {
       list = list.filter((c) => WOMENS_HEALTH_CATEGORIES.includes(c.category));
+    } else if (activeFilter === "heart") {
+      list = list.filter((c) => c.category === "cardiovascular");
+    } else if (activeFilter === "respiratory") {
+      list = list.filter((c) => c.category === "respiratory");
+    } else if (activeFilter === "digestive") {
+      list = list.filter((c) => c.category === "digestive");
+    } else if (activeFilter === "skin") {
+      list = list.filter((c) => c.category === "skin");
+    } else if (activeFilter === "cancer") {
+      list = list.filter((c) => c.category === "cancer");
+    } else if (activeFilter === "infectious") {
+      list = list.filter((c) => c.category === "infectious");
     }
 
     if (search.trim()) {
@@ -268,6 +286,12 @@ export default function HealthAZPage() {
         </div>
 
         {/* Condition groups */}
+        {/* Results count */}
+        <div className="mb-4 text-sm" style={{ color: "var(--hw-text-muted)" }}>
+          Showing {filtered.length} of {allConditions.length} conditions
+          {search && <span> matching &quot;{search}&quot;</span>}
+        </div>
+
         {filtered.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-lg" style={{ color: "var(--hw-text-secondary)" }}>
@@ -329,7 +353,7 @@ export default function HealthAZPage() {
                           }}
                         >
                           <Link
-                            href={condition.hasDetailPage ? `/health-a-z/${condition.slug}` : `/search?q=${encodeURIComponent(condition.name)}`}
+                            href={`/health-a-z/${condition.slug}`}
                             className="group flex h-full flex-col rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                             style={{
                               backgroundColor: "var(--hw-surface)",
