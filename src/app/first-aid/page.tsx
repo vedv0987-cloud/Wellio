@@ -19,6 +19,7 @@ import {
   Baby,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { HeartIllustration, FloatingIllustration } from "@/components/ui/MedicalIllustrations";
 
 interface ProcedureStep {
   step: number;
@@ -276,8 +277,20 @@ export default function FirstAidPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10"
+          className="text-center mb-10 relative"
         >
+          {/* Floating heart illustration */}
+          <div className="absolute -left-4 top-1/2 -translate-y-1/2 hidden lg:block">
+            <FloatingIllustration className="opacity-50">
+              <HeartIllustration size={90} />
+            </FloatingIllustration>
+          </div>
+          <div className="absolute -right-4 top-1/2 -translate-y-1/2 hidden lg:block">
+            <FloatingIllustration className="opacity-50">
+              <HeartIllustration size={70} />
+            </FloatingIllustration>
+          </div>
+
           <h1 className="text-4xl sm:text-5xl font-bold font-display mb-3">
             First Aid Guide
           </h1>

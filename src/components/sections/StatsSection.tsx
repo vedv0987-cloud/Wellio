@@ -120,10 +120,28 @@ export function StatsSection() {
   return (
     <section
       ref={ref}
-      className="py-20 sm:py-28"
+      className="relative overflow-hidden py-20 sm:py-28"
       style={{ background: "var(--hw-bg)" }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Subtle gradient mesh background */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-30"
+        style={{
+          background:
+            "radial-gradient(ellipse at 20% 50%, rgba(13,148,136,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(139,92,246,0.06) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Decorative cross pattern */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 4v4H4v4h4v4h4v-4h4V8h-4V4H8z' fill='%23666' fill-opacity='1'/%3E%3C/svg%3E")`,
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      <div className="relative z-[1] mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

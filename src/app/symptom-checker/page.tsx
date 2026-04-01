@@ -22,6 +22,7 @@ import {
   Activity,
 } from "lucide-react";
 import Link from "next/link";
+import { DNAIllustration, ShieldIllustration } from "@/components/ui/MedicalIllustrations";
 import {
   type BodyRegion,
   type SelectedSymptom,
@@ -269,7 +270,13 @@ export default function SymptomCheckerPage() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3 }}
+              className="relative"
             >
+              {/* Subtle DNA background decoration */}
+              <div className="pointer-events-none absolute -right-8 -top-4 opacity-[0.07]">
+                <DNAIllustration size={180} />
+              </div>
+
               {/* Sex toggle */}
               <div className="mb-6 flex items-center justify-center gap-2">
                 <span
@@ -911,19 +918,22 @@ export default function SymptomCheckerPage() {
 
               {/* Disclaimer */}
               <div
-                className="mt-6 flex items-start gap-2 rounded-xl border px-4 py-3"
+                className="mt-6 flex items-start gap-3 rounded-xl border px-4 py-3 relative overflow-hidden"
                 style={{
                   borderColor: "var(--hw-border)",
                   backgroundColor: "var(--hw-surface-secondary)",
                 }}
               >
+                <div className="pointer-events-none absolute -right-2 -top-2 opacity-[0.08]">
+                  <ShieldIllustration size={80} />
+                </div>
                 <AlertTriangle
                   size={16}
                   className="mt-0.5 flex-shrink-0"
                   style={{ color: "var(--hw-accent-secondary, #F59E0B)" }}
                 />
                 <p
-                  className="text-xs leading-relaxed"
+                  className="text-xs leading-relaxed relative z-[1]"
                   style={{ color: "var(--hw-text-muted)" }}
                 >
                   This is not a diagnosis. The results are based on common

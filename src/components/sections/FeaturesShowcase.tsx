@@ -81,9 +81,22 @@ export function FeaturesShowcase() {
     <section
       ref={ref}
       className="relative overflow-hidden py-20 sm:py-28"
-      style={{ background: "var(--hw-bg)" }}
+      style={{
+        background:
+          "linear-gradient(180deg, var(--hw-bg) 0%, color-mix(in srgb, var(--hw-accent) 3%, var(--hw-surface-secondary)) 50%, var(--hw-bg) 100%)",
+      }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Decorative dots pattern */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, var(--hw-text-primary) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-[1]">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}

@@ -8,9 +8,9 @@ const footerColumns = [
   {
     title: "Platform",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Mission", href: "/mission" },
-      { label: "Contact", href: "/contact" },
+      { label: "Home", href: "/" },
+      { label: "Health A-Z", href: "/health-a-z" },
+      { label: "Learning Paths", href: "/learning-paths" },
     ],
   },
   {
@@ -25,17 +25,17 @@ const footerColumns = [
   {
     title: "Resources",
     links: [
-      { label: "Health A-Z", href: "/health-a-z" },
       { label: "Lab Tests", href: "/lab-tests" },
       { label: "Glossary", href: "/glossary" },
+      { label: "Search", href: "/search" },
     ],
   },
   {
-    title: "Legal",
+    title: "Information",
     links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
-      { label: "Medical Disclaimer", href: "/disclaimer" },
+      { label: "Health A-Z Encyclopedia", href: "/health-a-z" },
+      { label: "AI Health Assistant", href: "/ai-chat" },
+      { label: "Emergency First Aid", href: "/first-aid" },
     ],
   },
 ];

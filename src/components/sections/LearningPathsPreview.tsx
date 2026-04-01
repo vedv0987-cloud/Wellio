@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Clock, BookOpen, BarChart3, ArrowRight, CheckCircle2, Calendar } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 
@@ -180,6 +180,15 @@ const cardVariants = {
 
 export function LearningPathsPreview() {
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
+  const [enrolledPaths, setEnrolledPaths] = useState<Set<string>>(new Set());
+  const [enrollmentToast, setEnrollmentToast] = useState<string | null>(null);
+
+  const handleEnroll = (slug: string) => {
+    setEnrolledPaths((prev) => new Set(prev).add(slug));
+    setSelectedPath(null);
+    setEnrollmentToast(slug);
+    setTimeout(() => setEnrollmentToast(null), 3000);
+  };
 
   return (
     <section
@@ -408,17 +417,52 @@ export function LearningPathsPreview() {
             </div>
 
             {/* CTA */}
-            <Link
-              href="/learning-paths"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-opacity duration-150 font-[family-name:var(--font-display)] hover:opacity-90"
-              style={{ backgroundColor: selectedPath.color }}
-            >
-              Start Learning
-              <ArrowRight size={16} />
-            </Link>
+            {enrolledPaths.has(selectedPath.slug) ? (
+              <div
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold font-[family-name:var(--font-display)]"
+                style={{
+                  background: `${selectedPath.color}12`,
+                  color: selectedPath.color,
+                  border: `1.5px solid ${selectedPath.color}30`,
+                }}
+              >
+                <CheckCircle2 size={16} />
+                Enrolled - Continue Learning
+              </div>
+            ) : (
+              <button
+                onClick={() => handleEnroll(selectedPath.slug)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-opacity duration-150 font-[family-name:var(--font-display)] hover:opacity-90 cursor-pointer"
+                style={{ backgroundColor: selectedPath.color }}
+              >
+                Start Learning
+                <ArrowRight size={16} />
+              </button>
+            )}
           </div>
         )}
       </Modal>
+
+      {/* Enrollment Toast */}
+      <AnimatePresence>
+        {enrollmentToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl px-6 py-4 shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              color: "white",
+            }}
+          >
+            <CheckCircle2 size={20} />
+            <span className="text-sm font-semibold font-[family-name:var(--font-display)]">
+              You&apos;re enrolled! Day 1 starts now.
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

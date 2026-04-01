@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Hash,
 } from "lucide-react";
+import { BrainIllustration, FloatingIllustration } from "@/components/ui/MedicalIllustrations";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -408,6 +409,11 @@ export default function AIChatPage() {
                   size={30}
                   color="var(--hw-accent)"
                 />
+
+                {/* Decorative brain illustration */}
+                <FloatingIllustration className="mb-4 opacity-60">
+                  <BrainIllustration size={80} />
+                </FloatingIllustration>
 
                 {/* Central icon */}
                 <motion.div

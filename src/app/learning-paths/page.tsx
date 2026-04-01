@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Clock,
   BookOpen,
@@ -12,6 +12,7 @@ import {
   Users,
   Calendar,
   GraduationCap,
+  CheckCircle2,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 
@@ -262,6 +263,15 @@ function ProgressRing({
 export default function LearningPathsPage() {
   const [paths] = useState(learningPaths);
   const [activePath, setActivePath] = useState<LearningPath | null>(null);
+  const [enrolledPaths, setEnrolledPaths] = useState<Set<string>>(new Set());
+  const [enrollmentToast, setEnrollmentToast] = useState<string | null>(null);
+
+  const handleEnroll = (pathId: string) => {
+    setEnrolledPaths((prev) => new Set(prev).add(pathId));
+    setActivePath(null);
+    setEnrollmentToast(pathId);
+    setTimeout(() => setEnrollmentToast(null), 3000);
+  };
 
   return (
     <div
@@ -380,7 +390,7 @@ export default function LearningPathsPage() {
                   </div>
                 </div>
                 <ProgressRing
-                  progress={path.progress}
+                  progress={enrolledPaths.has(path.id) ? 12 : path.progress}
                   color={path.color}
                   gradient={path.gradient}
                   size={72}
@@ -405,30 +415,72 @@ export default function LearningPathsPage() {
                 {path.description}
               </p>
 
-              {/* Start Button - opens modal */}
-              <button
-                onClick={() => setActivePath(path)}
-                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-semibold text-white transition-all duration-300 group-hover:shadow-lg"
-                style={{
-                  background: path.gradient,
-                  boxShadow: `0 2px 12px ${path.glowColor}`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 4px 20px ${path.glowColor}`;
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = `0 2px 12px ${path.glowColor}`;
-                  e.currentTarget.style.transform = "scale(1)";
-                }}
-              >
-                Start Now
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              {/* Start / Continue Button */}
+              {enrolledPaths.has(path.id) ? (
+                <button
+                  onClick={() => setActivePath(path)}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-semibold transition-all duration-300 group-hover:shadow-lg"
+                  style={{
+                    background: `${path.color}15`,
+                    color: path.color,
+                    border: `1.5px solid ${path.color}40`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `${path.color}25`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `${path.color}15`;
+                  }}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Continue Learning
+                </button>
+              ) : (
+                <button
+                  onClick={() => setActivePath(path)}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-semibold text-white transition-all duration-300 group-hover:shadow-lg"
+                  style={{
+                    background: path.gradient,
+                    boxShadow: `0 2px 12px ${path.glowColor}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = `0 4px 20px ${path.glowColor}`;
+                    e.currentTarget.style.transform = "scale(1.02)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = `0 2px 12px ${path.glowColor}`;
+                    e.currentTarget.style.transform = "scale(1)";
+                  }}
+                >
+                  Start Now
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </button>
+              )}
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* Enrollment Toast */}
+      <AnimatePresence>
+        {enrollmentToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl px-6 py-4 shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              color: "white",
+            }}
+          >
+            <CheckCircle2 size={20} />
+            <span className="text-sm font-semibold font-[family-name:var(--font-display)]">
+              You&apos;re enrolled! Day 1 starts now.
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Path Detail Modal */}
       <Modal
@@ -556,18 +608,31 @@ export default function LearningPathsPage() {
               </div>
 
               {/* Begin Journey CTA */}
-              <Link
-                href="/learning-paths"
-                onClick={() => setActivePath(null)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold text-white transition-all duration-300 font-[family-name:var(--font-display)] hover:opacity-90 hover:shadow-lg"
-                style={{
-                  background: p.gradient,
-                  boxShadow: `0 4px 20px ${p.glowColor}`,
-                }}
-              >
-                Begin Journey
-                <ArrowRight size={16} />
-              </Link>
+              {enrolledPaths.has(p.id) ? (
+                <div
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold font-[family-name:var(--font-display)]"
+                  style={{
+                    background: `${p.color}12`,
+                    color: p.color,
+                    border: `1.5px solid ${p.color}30`,
+                  }}
+                >
+                  <CheckCircle2 size={16} />
+                  Enrolled - Continue Learning
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleEnroll(p.id)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold text-white transition-all duration-300 font-[family-name:var(--font-display)] hover:opacity-90 hover:shadow-lg cursor-pointer"
+                  style={{
+                    background: p.gradient,
+                    boxShadow: `0 4px 20px ${p.glowColor}`,
+                  }}
+                >
+                  Begin Journey
+                  <ArrowRight size={16} />
+                </button>
+              )}
             </div>
           );
         })()}
